@@ -6,6 +6,9 @@
         "price": {
             "Coal": 12
         },
+        "priceIncrement": {
+            "Coal": 4
+        },
         "effect": {
             "click": 1
         }
@@ -15,7 +18,10 @@
         "description": "Employee - Destroying Ores over Time",
         "image": "./assets/employee_upgrade.png",
         "price": {
-            "Gold": 20
+            "Gold": 2
+        },
+        "priceIncrement": {
+            "Gold": 4
         },
         "effect": {
             "tick": 1

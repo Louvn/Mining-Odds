@@ -9,13 +9,13 @@ let savedGame = JSON.parse(localStorage.getItem("save")) || {
     oreDamageOnClick: 1,
     oreDamageOnTick: 0,
     level: 0,
-    inventory: {},
+    inventory: {"Coal": 2000},
+    shop: {},
     currentOre: null
 };
 
 let isPressed = false;
 let allOres = [];
-let allShopItems = [];
 
 document.addEventListener("keydown", (e) => {
     if((e.code === "Enter" || e.code === "Space") && !isPressed) {
@@ -31,7 +31,7 @@ document.addEventListener("keyup", (e) => {
 
 function renderInventory(inv = savedGame.inventory, invScreen = inventoryScreen, id = "inventory") {
     Object.entries(inv).forEach(([ore, value]) => {
-        let existing = document.getElementById(`inventory-${ore}`);
+        let existing = document.getElementById(`${id}-${ore}`);
         if (!existing) {
             existing = document.createElement("li");
             existing.id = (`${id}-${ore}`);
@@ -98,8 +98,25 @@ function closeShop() {
     shop.classList.remove("open");
 }
 
+function increaseItemPrice(item) {
+    Object.entries(item.priceIncrement).forEach(([k, v]) => {
+        savedGame.shop.forEach((itemInSave) => {
+            if (item.name == itemInSave.name){
+                itemInSave.price[k] += v;
+            }
+        })
+    })
+    renderShop();
+}
+
 function buyItem(item) {
-    const requirementsToBuy = Object.entries(item.price);
+    let itemInSave;
+    savedGame.shop.forEach((saveItem) => {
+        if (saveItem.name == item.name) {
+            itemInSave = saveItem;
+        }
+    })
+    const requirementsToBuy = Object.entries(itemInSave.price);
 
     for (const [ore, number] of requirementsToBuy) {
         let inInventory = false;
@@ -116,6 +133,7 @@ function buyItem(item) {
         savedGame.inventory[ore] -= number;
     });
     renderInventory();
+    increaseItemPrice(item);
 
     let effect = item.effect;
 
@@ -128,7 +146,8 @@ function buyItem(item) {
 }
 
 function renderShop() {
-    allShopItems.forEach(shopItem => {
+    shopItemsScreen.innerHTML = "";
+    savedGame.shop.forEach(shopItem => {
         const shopItemCard = shopItemCardTemplate.content.cloneNode(true);
         shopItemCard.querySelector(".image").src = shopItem.image;
         shopItemCard.querySelector(".image").alt = shopItem.name;
@@ -148,7 +167,7 @@ fetch("ores.json")
         fetch("shop.json")
             .then(response => response.json())
             .then(data => {
-                allShopItems = data;
+                if (savedGame.shop == {}) savedGame.shop = data;
                 renderShop();
                 renderInventory();
                 generateNewOre(savedGame.currentOre);
@@ -165,5 +184,6 @@ setInterval(() => {
         destroyOre();
     }
 
+    // save the Game
     localStorage.setItem("save", JSON.stringify(savedGame));
 }, 1000);
