@@ -5,13 +5,23 @@ const shop = document.getElementById("shop");
 const shopItemsScreen = document.getElementById("shopItems");
 const shopItemCardTemplate = document.getElementById("shopItemCardTemplate");
 
-let savedGame = JSON.parse(localStorage.getItem("save")) || {
-    oreDamageOnClick: 1,
-    oreDamageOnTick: 0,
-    level: 0,
-    inventory: {"Coal": 2000},
-    shop: {},
-    currentOre: null
+// Load Saved Game
+let savedGame;
+if ("everlyAPI" in window) {
+    savedGame = everlyAPI.loadGame();
+} else {
+    savedGame = JSON.parse(localStorage.getItem("save"));
+}
+
+if (!savedGame) {
+    savedGame = {
+        oreDamageOnClick: 1,
+        oreDamageOnTick: 0,
+        level: 0,
+        inventory: {},
+        shop: [],
+        currentOre: null
+    }
 };
 
 let isPressed = false;
@@ -167,7 +177,7 @@ fetch("ores.json")
         fetch("shop.json")
             .then(response => response.json())
             .then(data => {
-                if (savedGame.shop == {}) savedGame.shop = data;
+                if (savedGame.shop.length === 0) savedGame.shop = data;
                 renderShop();
                 renderInventory();
                 generateNewOre(savedGame.currentOre);
@@ -185,5 +195,9 @@ setInterval(() => {
     }
 
     // save the Game
-    localStorage.setItem("save", JSON.stringify(savedGame));
+    if ("everlyAPI" in window) {
+        everlyAPI.saveGame(JSON.stringify(savedGame));
+    } else {
+        localStorage.setItem("save", JSON.stringify(savedGame));
+    }
 }, 1000);
