@@ -8,9 +8,13 @@ const shopItemCardTemplate = document.getElementById("shopItemCardTemplate");
 // Load Saved Game
 let savedGame;
 if ("everlyAPI" in window) {
-    savedGame = everlyAPI.loadGame();
+    everlyAPI.loadGame((data) => {
+        savedGame = data;
+        startGame();
+    });
 } else {
     savedGame = JSON.parse(localStorage.getItem("save"));
+    startGame();
 }
 
 if (!savedGame) {
@@ -169,35 +173,37 @@ function renderShop() {
     })
 }
 
-fetch("ores.json")
-    .then(response => response.json())
-    .then(data => {
-        allOres = data;
+function startGame() {
+    fetch("ores.json")
+        .then(response => response.json())
+        .then(data => {
+            allOres = data;
 
-        fetch("shop.json")
-            .then(response => response.json())
-            .then(data => {
-                if (savedGame.shop.length === 0) savedGame.shop = data;
-                renderShop();
-                renderInventory();
-                generateNewOre(savedGame.currentOre);
-            })
-    })
-    .catch(error => {
-        console.error("Error while loading the ores.json and shop.json files:", error);
-        alert("The Game Data did not load correctly. Please try to reload the Site.");
-    })
+            fetch("shop.json")
+                .then(response => response.json())
+                .then(data => {
+                    if (savedGame.shop.length === 0) savedGame.shop = data;
+                    renderShop();
+                    renderInventory();
+                    generateNewOre(savedGame.currentOre);
+                })
+        })
+        .catch(error => {
+            console.error("Error while loading the ores.json and shop.json files:", error);
+            alert("The Game Data did not load correctly. Please try to reload the Site.");
+        })
 
-setInterval(() => {
-    oreDestroyingProgress.value -= savedGame.oreDamageOnTick;
-    if (oreDestroyingProgress.value <= 0) {
-        destroyOre();
-    }
+    setInterval(() => {
+        oreDestroyingProgress.value -= savedGame.oreDamageOnTick;
+        if (oreDestroyingProgress.value <= 0) {
+            destroyOre();
+        }
 
-    // save the Game
-    if ("everlyAPI" in window) {
-        everlyAPI.saveGame(savedGame);
-    } else {
-        localStorage.setItem("save", JSON.stringify(savedGame));
-    }
-}, 1000);
+        // save the Game
+        if ("everlyAPI" in window) {
+            everlyAPI.saveGame(savedGame);
+        } else {
+            localStorage.setItem("save", JSON.stringify(savedGame));
+        }
+    }, 1000);
+}
