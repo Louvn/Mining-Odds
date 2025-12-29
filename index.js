@@ -7,8 +7,8 @@ const shopItemCardTemplate = document.getElementById("shopItemCardTemplate");
 const npcWindow = document.getElementById("npcWindow");
 
 // Load Saved Game
+let savedGame;
 async function initGame() {
-    let savedGame;
     if ("everlyAPI" in window) {
         savedGame = await everlyAPI.loadGame();
         startGame();
@@ -16,25 +16,26 @@ async function initGame() {
         savedGame = JSON.parse(localStorage.getItem("save"));
         startGame();
     }
-}
 
-initGame();
-if (!savedGame) {
-    savedGame = {
-        oreDamageOnClick: 1,
-        oreDamageOnTick: 0,
-        level: 0,
-        inventory: {"Ruby": 50, "Gold": 50, "Amethyst": 70},
-        shop: [],
-        allOres: [],
-        currentOre: null,
-        efficiency: 1
+    if (!savedGame) {
+        savedGame = {
+            oreDamageOnClick: 1,
+            oreDamageOnTick: 0,
+            level: 0,
+            inventory: {},
+            shop: [],
+            allOres: [],
+            currentOre: null,
+            efficiency: 1
+        }
     }
-};
+} 
 
 let allNpcs = null;
 let isPressed = false;
 let isTalking = false;
+
+initGame();
 
 document.addEventListener("keydown", (e) => {
     if((e.code === "Enter" || e.code === "Space") && !isPressed) {
